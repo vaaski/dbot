@@ -1,5 +1,12 @@
 {
-  "cSpell.words": ["etag", "ytsr", "dbot", "discordjs", "ytdl"],
+  "cSpell.words": [
+    "bruh",
+    "dbot",
+    "discordjs",
+    "etag",
+    "ytdl",
+    "ytsr"
+  ],
   "cSpell.ignorePaths": [
     "**/package-lock.json",
     "**/node_modules/**",

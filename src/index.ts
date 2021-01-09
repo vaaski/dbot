@@ -21,7 +21,7 @@ export const shared: Shared = {
   connection: undefined,
   dispatcher: undefined,
   playingNotification: undefined,
-  volume: 0.2,
+  volume: 0.05,
 }
 
 export const constants = {
@@ -30,6 +30,7 @@ export const constants = {
     volUp: "🔊",
     playpause: "⏯️",
     stop: "⏹️",
+    earrape: "639199486396203017",
   },
 }
 
@@ -90,16 +91,24 @@ const handleReaction = async (reaction: Reaction, user: User) => {
       else dispatcher?.pause()
       break
     case volDown:
-      shared.volume = Math.max(0.05, shared.volume - 0.05)
+      shared.volume = Math.max(0.01, shared.volume - 0.01)
       shared.dispatcher?.setVolume(shared.volume)
       break
     case volUp:
-      shared.volume = Math.min(1, shared.volume + 0.05)
+      shared.volume = Math.min(1, shared.volume + 0.01)
       shared.dispatcher?.setVolume(shared.volume)
       break
     case stop:
       shared.dispatcher?.destroy()
       shared.connection?.disconnect()
+      shared.playingNotification?.delete()
+      break
+    case "bruh":
+      const volume = shared.dispatcher?.volume
+
+      if (volume && volume > 1) shared.dispatcher?.setVolume(shared.volume)
+      else shared.dispatcher?.setVolume(999)
+      break
   }
 }
 client.on("messageReactionAdd", handleReaction)

@@ -20,13 +20,16 @@ export const play = (voiceChannel: VoiceChannel | undefined | null, video: strin
 
 type NotifyChannel = TextChannel | DMChannel | NewsChannel
 export const notify = async (textChannel: NotifyChannel, playing: string) => {
+  textChannel.startTyping()
   shared.playingNotification = await textChannel.send(`> playing ${playing}`)
-  const { playpause, volDown, volUp, stop } = constants.emoji
+  const { playpause, volDown, volUp, stop, earrape } = constants.emoji
 
   await shared.playingNotification.react(playpause)
   await shared.playingNotification.react(volDown)
   await shared.playingNotification.react(volUp)
   await shared.playingNotification.react(stop)
+  await shared.playingNotification.react(earrape)
+  textChannel.stopTyping()
 }
 
 const action: Action = {
@@ -46,7 +49,7 @@ const action: Action = {
 
       const voiceChannel = message.member?.voice.channel
 
-      notify(message.channel, "video")
+      notify(message.channel, "video").then(() => message.delete())
       await play(voiceChannel, "7nQ2oiVqKHw")
       await play(voiceChannel, video)
       await play(voiceChannel, "Gb2jGy76v0Y")
