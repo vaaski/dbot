@@ -6,13 +6,14 @@ const youtubeKey = process.env.YOUTUBE_DATA_TOKEN
 
 const botName = process.env.BOT_NAME
 
-const action: Action = {
-  match: /^(?:search|s)\s(.+)/i,
-  async handler(cmd, message) {
-    const searchInput = this.match.exec(cmd)?.[1]
-    if (!searchInput) return
+interface SearchYouTubeResult {
+  title: string
+  url: string
+  thumbnail: string
+}
 
-    const start = +new Date()
+export const searchYouTube = (searchInput: string): Promise<SearchYouTubeResult> =>
+  new Promise(async (res, rej) => {
     const response = (
       await got.get(ytSearchAPI, {
         searchParams: {
@@ -25,33 +26,49 @@ const action: Action = {
         responseType: "json",
       })
     ).body as YouTubeSearchResult
-    console.log(`took ${+new Date() - start}ms`)
 
     const result = response.items?.[0]
-    if (!result) return message.reply(`nothing found for ${searchInput}`)
+    if (!result) return rej()
 
-    const title = result.snippet.title || "title"
     const videoId = result.id.videoId
-    const url = `https://youtu.be/${videoId}`
-    const thumbnail = `https://i3.ytimg.com/vi/${videoId}/mqdefault.jpg`
 
-    await message.channel.send("", {
-      embed: {
-        thumbnail: {
-          url: "attachment://thumb.jpg",
-        },
-        title,
-        url,
-        author: {
-          name: botName,
-        },
-        color: "#FF0000",
-        footer: {
-          text: "press ⏯️ to play",
-        },
-      },
-      files: [{ attachment: thumbnail, name: "thumb.jpg" }],
+    return res({
+      title: result.snippet.title || "title",
+      url: `https://youtu.be/${videoId}`,
+      thumbnail: `https://i3.ytimg.com/vi/${videoId}/mqdefault.jpg`,
     })
+  })
+
+const action: Action = {
+  match: /^(?:search|s)\s(.+)/i,
+  async handler(cmd, message) {
+    const searchInput = this.match.exec(cmd)?.[1]
+
+    try {
+      if (!searchInput) throw new Error("no search input")
+
+      const { title, url, thumbnail } = await searchYouTube(searchInput)
+
+      await message.channel.send("", {
+        embed: {
+          thumbnail: {
+            url: "attachment://thumb.jpg",
+          },
+          title,
+          url,
+          author: {
+            name: botName,
+          },
+          color: "#FF0000",
+          footer: {
+            text: "press ⏯️ to play",
+          },
+        },
+        files: [{ attachment: thumbnail, name: "thumb.jpg" }],
+      })
+    } catch (err) {
+      message.reply(`nothing found for ${searchInput}`)
+    }
   },
 }
 
