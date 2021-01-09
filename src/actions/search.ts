@@ -49,7 +49,8 @@ const action: Action = {
 
       const { title, url, thumbnail } = await searchYouTube(searchInput)
 
-      await message.channel.send("", {
+      message.delete()
+      const reply = await message.channel.send("", {
         embed: {
           thumbnail: {
             url: "attachment://thumb.jpg",
@@ -61,11 +62,12 @@ const action: Action = {
           },
           color: "#FF0000",
           footer: {
-            text: "press ⏯️ to play",
+            text: "press ▶️ to play",
           },
         },
         files: [{ attachment: thumbnail, name: "thumb.jpg" }],
       })
+      await reply.react("▶️")
     } catch (err) {
       message.reply(`nothing found for ${searchInput}`)
     }
