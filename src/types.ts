@@ -1,5 +1,7 @@
 import type * as Discord from "discord.js"
 
+export type NotifyChannel = Discord.TextChannel
+
 export interface Action {
   match: RegExp
   handler(cmd: string, message: Discord.Message): Promise<any>

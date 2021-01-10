@@ -1,9 +1,9 @@
-import type { Action } from "../types"
-import type { DMChannel, NewsChannel, StreamOptions, TextChannel, VoiceChannel } from "discord.js"
+import type { Action, NotifyChannel } from "../types"
+import type { StreamOptions, TextChannel, VoiceChannel } from "discord.js"
 
 import ytdl from "ytdl-core-discord"
-import { searchYouTube } from "./search"
 import { constants, shared } from "../index"
+import queue from "../queue"
 
 const volume = shared.volume
 const defaultSettings: StreamOptions = { type: "opus", volume }
@@ -18,7 +18,6 @@ export const play = (voiceChannel: VoiceChannel | undefined | null, video: strin
     shared.dispatcher?.on("finish", res)
   })
 
-type NotifyChannel = TextChannel | DMChannel | NewsChannel
 export const notify = async (textChannel: NotifyChannel, playing: string) => {
   textChannel.startTyping()
   shared.playingNotification = await textChannel.send(`> playing ${playing}`)
@@ -39,22 +38,11 @@ const action: Action = {
 
     try {
       if (!searchInput) throw new Error("no search input")
-      let video = searchInput
 
-      const isURL = ytdl.validateURL(searchInput)
-      if (!isURL) {
-        const { url } = await searchYouTube(searchInput)
-        video = url
-      }
+      shared.voiceChannel = message.member?.voice.channel
+      shared.textChannel = message.channel as TextChannel
 
-      const voiceChannel = message.member?.voice.channel
-
-      notify(message.channel, "video").then(() => message.delete())
-      await play(voiceChannel, "7nQ2oiVqKHw")
-      await play(voiceChannel, video)
-      await play(voiceChannel, "Gb2jGy76v0Y")
-      shared.playingNotification?.delete()
-      voiceChannel?.leave()
+      queue.add.call(queue, searchInput)
     } catch (error) {
       console.log(error)
       message.reply(`can't play ${searchInput}`)

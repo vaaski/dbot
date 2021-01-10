@@ -14,6 +14,7 @@ interface SearchYouTubeResult {
 
 export const searchYouTube = (searchInput: string): Promise<SearchYouTubeResult> =>
   new Promise(async (res, rej) => {
+    console.log(`searching youtube for "${searchInput}"`)
     const response = (
       await got.get(ytSearchAPI, {
         searchParams: {
