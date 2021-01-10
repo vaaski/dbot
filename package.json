@@ -8,7 +8,8 @@
     "dev": "nodemon",
     "build": "rimraf ./build && tsc",
     "start": "npm run build && node -r dotenv/config build/index.js",
-    "commit": "cz -S"
+    "commit": "cz -S",
+    "docker": "docker build -t vaaski/dbot && docker run -d vaaski/dbot --name dbot"
   },
   "author": "vaaski <admin@vaa.ski>",
   "license": "ISC",

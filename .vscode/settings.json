@@ -1,12 +1,5 @@
 {
-  "cSpell.words": [
-    "bruh",
-    "dbot",
-    "discordjs",
-    "etag",
-    "ytdl",
-    "ytsr"
-  ],
+  "cSpell.words": ["bruh", "dbot", "discordjs", "etag", "ytdl", "ytsr"],
   "cSpell.ignorePaths": [
     "**/package-lock.json",
     "**/node_modules/**",
@@ -15,5 +8,6 @@
     ".vscode",
     ".vscode-insiders",
     ".env"
-  ]
+  ],
+  "terminal.integrated.shell.windows": "C:\\Windows\\System32\\wsl.exe"
 }

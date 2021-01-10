@@ -18,7 +18,7 @@ interface QueueItem {
 
 interface Queue {
   add(input: string | internal.Readable, title?: string): Promise<void>
-  playNext(): Promise<any>
+  playNext(force?: boolean): Promise<any>
   playing: undefined | QueueItem
   list: QueueItem[]
 }
@@ -55,9 +55,12 @@ const queue: Queue = {
       this.list.push({ stream: input, title })
     }
 
-    if (!shared.connection && !shared.dispatcher && !this.playing) this.playNext()
+    console.log(`added ${input} to queue, length:`, this.list.length)
+    this.playNext()
   },
-  async playNext() {
+  async playNext(force) {
+    if (this.playing && !force) return
+
     this.playing = this.list.shift()
     if (!this.playing) {
       if (shared.connection) await playFile("shutdown", shared.connection)
@@ -68,7 +71,10 @@ const queue: Queue = {
       shared.connection = undefined
       return
     }
-    if (!shared.voiceChannel) return console.log("no voice channel found")
+    if (!shared.voiceChannel) {
+      if (shared.textChannel) return shared.textChannel.send("you're not in a voice channel.")
+      return console.log("no voice channel found")
+    }
 
     // if (shared.playingNotification) await shared.playingNotification.delete()
     // if (shared.textChannel) notify(shared.textChannel, this.playing.title)
@@ -81,7 +87,10 @@ const queue: Queue = {
     const options = { volume: shared.volume, ...this.playing.options }
     shared.dispatcher = shared.connection.play(this.playing.stream, options)
 
-    shared.dispatcher.on("finish", () => this.playNext.call(this))
+    shared.dispatcher.on("finish", () => {
+      this.playing = undefined
+      this.playNext.call(this)
+    })
   },
   playing: undefined,
   list: [],

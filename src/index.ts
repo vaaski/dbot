@@ -32,7 +32,7 @@ export const constants = {
     volUp: "🔊",
     playpause: "⏯️",
     stop: "⏹️",
-    earrape: "639199486396203017",
+    earpain: "639199486396203017",
   },
 }
 

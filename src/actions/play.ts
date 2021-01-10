@@ -21,13 +21,13 @@ export const play = (voiceChannel: VoiceChannel | undefined | null, video: strin
 export const notify = async (textChannel: NotifyChannel, playing: string) => {
   textChannel.startTyping()
   shared.playingNotification = await textChannel.send(`> playing ${playing}`)
-  const { playpause, volDown, volUp, stop, earrape } = constants.emoji
+  const { playpause, volDown, volUp, stop, earpain } = constants.emoji
 
   await shared.playingNotification.react(playpause)
   await shared.playingNotification.react(volDown)
   await shared.playingNotification.react(volUp)
   await shared.playingNotification.react(stop)
-  await shared.playingNotification.react(earrape)
+  await shared.playingNotification.react(earpain)
   textChannel.stopTyping()
 }
 
@@ -42,7 +42,7 @@ const action: Action = {
       shared.voiceChannel = message.member?.voice.channel
       shared.textChannel = message.channel as TextChannel
 
-      queue.add.call(queue, searchInput)
+      await queue.add.call(queue, searchInput)
     } catch (error) {
       console.log(error)
       message.reply(`can't play ${searchInput}`)
