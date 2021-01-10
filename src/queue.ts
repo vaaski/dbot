@@ -34,29 +34,33 @@ const playFile: PlayFile = (type, connection) =>
   })
 
 const queue: Queue = {
-  async add(input, title) {
-    if (typeof input === "string") {
-      if (ytdl.validateID(input)) {
-        const stream = await ytdl(input)
-        this.list.push({ stream, title: input, options: { type: "opus" } })
-      } else if (isURL(input)) {
-        const { host } = new URL(input)
-        title = title || `from ${host}`
+  add(input, title) {
+    const ctx = this
 
-        this.list.push({ stream: input, title })
+    return new Promise(async (res) => {
+      if (typeof input === "string") {
+        if (ytdl.validateID(input)) {
+          const stream = await ytdl(input)
+          ctx.list.push({ stream, title: input, options: { type: "opus" } })
+        } else if (isURL(input)) {
+          const { host } = new URL(input)
+          title = title || `from ${host}`
+
+          ctx.list.push({ stream: input, title })
+        } else {
+          const { title, url } = await searchYouTube(input)
+          const stream = await ytdl(url)
+
+          ctx.list.push({ stream, title, options: { type: "opus" } })
+        }
       } else {
-        const { title, url } = await searchYouTube(input)
-        const stream = await ytdl(url)
-
-        this.list.push({ stream, title, options: { type: "opus" } })
+        title = title || "something"
+        ctx.list.push({ stream: input, title })
       }
-    } else {
-      title = title || "something"
-      this.list.push({ stream: input, title })
-    }
+      res()
 
-    console.log(`added ${input} to queue, length:`, this.list.length)
-    this.playNext()
+      ctx.playNext()
+    })
   },
   async playNext(force) {
     if (this.playing && !force) return
