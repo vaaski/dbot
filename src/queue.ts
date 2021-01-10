@@ -6,22 +6,9 @@ import { isURL } from "./util"
 import { shared } from "."
 import { URL } from "url"
 import { searchYouTube } from "./actions/search"
-import { notify } from "./actions/play"
+import { deleteNotification, notify } from "./notify"
 import { createReadStream } from "fs"
 import { join } from "path"
-
-interface QueueItem {
-  title: string
-  stream: internal.Readable | string
-  options?: StreamOptions
-}
-
-interface Queue {
-  add(input: string | internal.Readable, title?: string): Promise<void>
-  playNext(force?: boolean): Promise<any>
-  playing: undefined | QueueItem
-  list: QueueItem[]
-}
 
 type PlayFile = (type: "startup" | "shutdown", connection: VoiceConnection) => Promise<void>
 
@@ -33,13 +20,29 @@ const playFile: PlayFile = (type, connection) =>
     shared.dispatcher.on("finish", res)
   })
 
+export interface QueueItem {
+  title: string
+  stream: internal.Readable | string
+  options?: StreamOptions
+}
+
+export interface Queue {
+  add(input: string | internal.Readable, title?: string): Promise<void>
+  playNext(force?: boolean): Promise<any>
+  stop(): Promise<void>
+  playing: undefined | QueueItem
+  list: QueueItem[]
+}
+
 const queue: Queue = {
   add(input, title) {
     const ctx = this
 
     return new Promise(async (res) => {
       if (typeof input === "string") {
-        if (ytdl.validateID(input)) {
+        if (ytdl.validateURL(input) || ytdl.validateID(input)) {
+          console.log("detected youtube id")
+          // todo fork amishshah/ytdl-core-discord to enable downloading from info
           const stream = await ytdl(input)
           ctx.list.push({ stream, title: input, options: { type: "opus" } })
         } else if (isURL(input)) {
@@ -66,22 +69,12 @@ const queue: Queue = {
     if (this.playing && !force) return
 
     this.playing = this.list.shift()
-    if (!this.playing) {
-      if (shared.connection) await playFile("shutdown", shared.connection)
+    if (!this.playing) return await this.stop()
 
-      shared.dispatcher?.destroy()
-      shared.connection?.disconnect()
-      shared.dispatcher = undefined
-      shared.connection = undefined
-      return
-    }
     if (!shared.voiceChannel) {
       if (shared.textChannel) return shared.textChannel.send("you're not in a voice channel.")
       return console.log("no voice channel found")
     }
-
-    // if (shared.playingNotification) await shared.playingNotification.delete()
-    // if (shared.textChannel) notify(shared.textChannel, this.playing.title)
 
     if (!shared.connection) {
       shared.connection = await shared.voiceChannel.join()
@@ -91,10 +84,21 @@ const queue: Queue = {
     const options = { volume: shared.volume, ...this.playing.options }
     shared.dispatcher = shared.connection.play(this.playing.stream, options)
 
+    if (shared.textChannel) notify(this)
+
     shared.dispatcher.on("finish", () => {
       this.playing = undefined
       this.playNext.call(this)
     })
+  },
+  async stop() {
+    if (shared.connection) await playFile("shutdown", shared.connection)
+
+    shared.dispatcher?.destroy()
+    shared.connection?.disconnect()
+    shared.dispatcher = undefined
+    shared.connection = undefined
+    await deleteNotification()
   },
   playing: undefined,
   list: [],

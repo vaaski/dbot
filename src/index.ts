@@ -31,6 +31,7 @@ export const constants = {
     volDown: "🔉",
     volUp: "🔊",
     playpause: "⏯️",
+    skip: "⏭️",
     stop: "⏹️",
     earpain: "639199486396203017",
   },
@@ -60,6 +61,7 @@ client.on("message", async (message) => {
 
     await action.handler(command, message)
   }
+  message.delete().catch((reason) => console.log(`cant delete command message ${reason}`))
 })
 
 client.on("messageReactionAdd", reactionHandler)

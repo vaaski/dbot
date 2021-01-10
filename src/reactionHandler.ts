@@ -1,6 +1,6 @@
 import type * as Discord from "discord.js"
 
-import { validateURL, getVideoID } from "ytdl-core-discord"
+import { validateURL } from "ytdl-core-discord"
 import { constants, shared } from "."
 import queue from "./queue"
 
@@ -17,17 +17,17 @@ export default async (reaction: Reaction, user: User) => {
 
   const { embeds } = reaction.message
   if (embeds?.[0]?.url && validateURL(embeds[0].url)) {
-    reaction.message.delete()
+    reaction.message
+      .delete()
+      .catch((reason) => console.log(`cant delete reacted message ${reason}`))
 
     shared.voiceChannel = user.presence?.member?.voice.channel
     shared.textChannel = reaction.message.channel as Discord.TextChannel
 
-    queue.add.call(queue, embeds[0].url)
-
-    return
+    return await queue.add.call(queue, embeds[0].url)
   }
 
-  const { playpause, volDown, volUp, stop } = constants.emoji
+  const { playpause, volDown, volUp, stop, skip } = constants.emoji
 
   switch (reaction.emoji.name) {
     case playpause:
@@ -44,15 +44,16 @@ export default async (reaction: Reaction, user: User) => {
       shared.dispatcher?.setVolume(shared.volume)
       break
     case stop:
-      shared.dispatcher?.destroy()
-      shared.connection?.disconnect()
-      shared.playingNotification?.delete()
+      await queue.stop()
       break
-    case "bruh":
-      const volume = shared.dispatcher?.volume
+    case skip:
+      shared.dispatcher?.end()
+      break
+    // case "bruh":
+    //   const volume = shared.dispatcher?.volume
 
-      if (volume && volume > 1) shared.dispatcher?.setVolume(shared.volume)
-      else shared.dispatcher?.setVolume(999)
-      break
+    //   if (volume && volume > 1) shared.dispatcher?.setVolume(shared.volume)
+    //   else shared.dispatcher?.setVolume(999)
+    //   break
   }
 }
