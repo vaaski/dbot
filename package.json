@@ -19,6 +19,7 @@
     "dotenv": "^8.2.0",
     "ffmpeg-static": "^4.2.7",
     "got": "^11.8.1",
+    "opentidal": "github:openTIDAL/openTIDAL.js",
     "ytdl-core-discord": "^1.2.5",
     "ytsr": "^3.2.1"
   },

@@ -16,7 +16,9 @@ export default async (reaction: Reaction, user: User) => {
   if (reaction.message.author.id !== botId) return
 
   const { embeds } = reaction.message
-  if (embeds?.[0]?.url && validateURL(embeds[0].url)) {
+  const isNotification = shared.playingNotification?.id === reaction.message.id
+
+  if (!isNotification && embeds?.[0]?.url && validateURL(embeds[0].url)) {
     reaction.message
       .delete()
       .catch((reason) => console.log(`cant delete reacted message ${reason}`))

@@ -62,7 +62,7 @@ export const searchYouTube = (searchInput: string): Promise<SearchYouTubeResult>
     }
   })
 
-const action: Action = {
+const search: Action = {
   match: /^(?:search|s)\s(.+)/i,
   async handler(cmd, message) {
     const searchInput = this.match.exec(cmd)?.[1]
@@ -99,4 +99,4 @@ const action: Action = {
   },
 }
 
-export default action
+export default search

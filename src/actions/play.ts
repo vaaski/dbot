@@ -12,9 +12,6 @@ const action: Action = {
     try {
       if (!searchInput) throw new Error("no search input")
 
-      shared.voiceChannel = message.member?.voice.channel
-      shared.textChannel = message.channel as TextChannel
-
       await queue.add.call(queue, searchInput)
     } catch (error) {
       console.log(error)

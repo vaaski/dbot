@@ -62,6 +62,8 @@ const queue: Queue = {
       }
       res()
 
+      if (shared.textChannel) notify(this)
+
       ctx.playNext()
     })
   },

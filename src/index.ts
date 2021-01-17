@@ -55,6 +55,9 @@ client.on("message", async (message) => {
   const commands = cleanContent.split(splitterRegex)
   const cleanedCommands = commands.map((c) => c.replace(removePrefixReg, ""))
 
+  shared.voiceChannel = message.member?.voice.channel
+  shared.textChannel = message.channel as Discord.TextChannel
+
   for (const command of cleanedCommands) {
     const action = actions.find((cmd: Action) => cmd.match.exec(command))
     if (!action) return channel.send("command not found")
