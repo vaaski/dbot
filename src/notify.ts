@@ -22,7 +22,7 @@ export const notify = async (queue: Queue) => {
 
   const { playing, list } = queue
   const next = list.map((t) => t.title).join("\nthen ")
-  let message = `> playing ${playing?.title}`
+  let message = `> playing ${playing?.title || "startup sound"}`
   if (list.length) message += "\nthen " + next
 
   if (message === lastMessage) return console.log("message is the same")

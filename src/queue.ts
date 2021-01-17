@@ -83,7 +83,12 @@ const queue: Queue = {
       await playFile("startup", shared.connection)
     }
 
-    const options = { volume: shared.volume, ...this.playing.options }
+    let volume = shared.volume
+    if (typeof this.playing.stream === "string" && /tidal/.test(this.playing.stream)) {
+      volume += 0.15
+    }
+
+    const options = { volume, ...this.playing.options }
     shared.dispatcher = shared.connection.play(this.playing.stream, options)
 
     if (shared.textChannel) notify(this)
