@@ -18,7 +18,7 @@
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "ffmpeg-static": "^4.2.7",
-    "got": "^11.8.1",
+    "got": "^11.8.5",
     "opentidal": "github:openTIDAL/openTIDAL.js",
     "ytdl-core-discord": "^1.2.5",
     "ytsr": "^3.2.1"
